@@ -64,15 +64,31 @@ export const getPost = async (req, res) => {
 };
 
 export const timelinePost = async (req, res) => {
+  const user = req.user;
   try {
-    const currentUser = await User.findById(req.body.userId);
-    const userPosts = await Post.find({ userId: currentUser._id });
-    const friendPosts = await Post.find({
-      userId: { $in: currentUser.following },
-    });
-    res.json(userPosts.concat(...friendPosts));
+    const currentUser = await User.findById(user.id);
+    const userPosts = await Post.find({ user: currentUser._id })
+      .populate("user", "_id profilePicture name")
+      .exec();
+    const timelinePosts = await Post.find({
+      user: { $in: currentUser.following },
+    })
+      .populate("user", "_id profilePicture name")
+      .exec();
+    res.json(userPosts.concat(...timelinePosts));
   } catch (err) {
     res.status(500).json(err);
     console.log(err);
+  }
+};
+
+export const userPost = async (req, res) => {
+  try {
+    const posts = await Post.find({ user: req.params.id })
+      .populate("user", "_id profilePicture name")
+      .exec();
+    res.status(200).json(posts);
+  } catch (err) {
+    res.status(500).json(err);
   }
 };

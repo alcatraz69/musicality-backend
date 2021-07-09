@@ -36,14 +36,26 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-export const getUser = async (req, res) => {
-  console.log("here");
+export const getCurrentUser = async (req, res) => {
+  const user = req.user;
   try {
-    const user = await User.findById(req.params.id);
-    const { password, updatedAt, createdAt, __v, ...other } = user._doc;
+    const Currentuser = await User.findById(user.id);
+    const { password, updatedAt, createdAt, __v, ...other } = Currentuser._doc;
     res.status(200).json(other);
   } catch (err) {
     res.status(500).json(err);
+    console.log(err);
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const Currentuser = await User.findById(req.params.id);
+    const { password, updatedAt, createdAt, __v, ...other } = Currentuser._doc;
+    res.status(200).json(other);
+  } catch (err) {
+    res.status(500).json(err);
+    console.log(err);
   }
 };
 
@@ -84,5 +96,19 @@ export const unfollowUser = async (req, res) => {
     }
   } else {
     res.status(403).json("you cant unfollow yourself");
+  }
+};
+
+export const getUserFriends = async (req, res) => {
+  const user = req.user;
+  try {
+    const Currentuser = await User.findById(user.id);
+    const friends = await User.find({
+      _id: { $in: Currentuser.following },
+    });
+    res.status(200).json(friends);
+  } catch (err) {
+    res.status(500).json(err);
+    console.log(err);
   }
 };
