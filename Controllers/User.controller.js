@@ -60,12 +60,12 @@ export const getUser = async (req, res) => {
 };
 
 export const followUser = async (req, res) => {
-  if (req.body.userId !== req.params.id) {
+  if (req.user.id !== req.params.id) {
     try {
       const otherUser = await User.findById(req.params.id);
-      const currentUser = await User.findById(req.body.userId);
-      if (!otherUser.followers.includes(req.body.userId)) {
-        await otherUser.updateOne({ $push: { followers: req.body.userId } });
+      const currentUser = await User.findById(req.user.id);
+      if (!otherUser.followers.includes(req.user.id)) {
+        await otherUser.updateOne({ $push: { followers: req.user.id } });
         await currentUser.updateOne({ $push: { following: req.params.id } });
         res.status(200).json("user has been followed");
       } else {
@@ -80,12 +80,12 @@ export const followUser = async (req, res) => {
 };
 
 export const unfollowUser = async (req, res) => {
-  if (req.body.userId !== req.params.id) {
+  if (req.user.id !== req.params.id) {
     try {
       const otherUser = await User.findById(req.params.id);
-      const currentUser = await User.findById(req.body.userId);
-      if (otherUser.followers.includes(req.body.userId)) {
-        await otherUser.updateOne({ $pull: { followers: req.body.userId } });
+      const currentUser = await User.findById(req.user.id);
+      if (otherUser.followers.includes(req.user.id)) {
+        await otherUser.updateOne({ $pull: { followers: req.user.id } });
         await currentUser.updateOne({ $pull: { followings: req.params.id } });
         res.status(200).json("user has been unfollowed");
       } else {

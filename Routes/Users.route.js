@@ -15,8 +15,8 @@ router.get("/getcurrentuser", authenticate, getCurrentUser);
 router.get("/getuser/:id", authenticate, getUser);
 router.get("/getuserfriends", authenticate, getUserFriends);
 router.put("/updateuser/:id", updateUser);
-router.put("/followuser/:id", followUser);
-router.put("/unfollowuser/:id", unfollowUser);
+router.put("/followuser/:id", authenticate, followUser);
+router.put("/unfollowuser/:id", authenticate, unfollowUser);
 router.delete("/deleteuser/:id", deleteUser);
 
 export default router;

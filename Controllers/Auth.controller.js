@@ -23,7 +23,6 @@ export const login = async (req, res) => {
       process.env.SECRET_KEY,
       { expiresIn: "24h" }
     );
-
     res.status(200).json({ result: userExists, token, msg: "logged in" });
   } catch (err) {
     console.log(err);
