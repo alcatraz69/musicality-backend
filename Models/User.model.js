@@ -38,9 +38,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    from: {
+      type: String,
+      default: "",
+    },
     interests: {
-      type: Array,
-      default: [],
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }

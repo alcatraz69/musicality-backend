@@ -42,12 +42,16 @@ export const deletePost = async (req, res) => {
 export const likePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    if (!post.likes.includes(req.body.userId)) {
-      await post.updateOne({ $push: { likes: req.body.userId } });
-      res.status(200).json("The post has been liked");
+    if (!post.likes.includes(req.user.id)) {
+      await post.updateOne({
+        $push: { likes: req.user.id },
+      });
+      res.status(200).json({ msg: "The post has been liked" });
     } else {
-      await post.updateOne({ $pull: { likes: req.body.userId } });
-      res.status(200).json("The post has been disliked");
+      await post.updateOne({
+        $pull: { likes: req.user.id },
+      });
+      res.status(200).json({ msg: "The post has been disliked" });
     }
   } catch (err) {
     res.status(500).json(err);
@@ -69,6 +73,7 @@ export const timelinePost = async (req, res) => {
     const currentUser = await User.findById(user.id);
     const userPosts = await Post.find({ user: currentUser._id })
       .populate("user", "_id profilePicture name")
+      .sort("-createdAt")
       .exec();
     const timelinePosts = await Post.find({
       user: { $in: currentUser.following },
@@ -86,6 +91,7 @@ export const userPost = async (req, res) => {
   try {
     const posts = await Post.find({ user: req.params.id })
       .populate("user", "_id profilePicture name")
+      .sort("-createdAt")
       .exec();
     res.status(200).json(posts);
   } catch (err) {

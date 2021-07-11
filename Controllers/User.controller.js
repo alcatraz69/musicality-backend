@@ -2,24 +2,20 @@ import { User } from "../Models/User.model.js";
 import bcrypt from "bcryptjs";
 
 export const updateUser = async (req, res) => {
-  if (req.body.userId === req.params.id) {
-    if (req.body.password) {
-      try {
-        req.body.password = await bcrypt.hash(req.body.password, 12);
-      } catch (err) {
-        return res.status(500).json(err);
-      }
-    }
+  if (req.body.data.password) {
     try {
-      const user = await User.findByIdAndUpdate(req.params.id, {
-        $set: req.body,
-      });
-      res.status(200).json({ msg: "Account has been updated" });
+      req.body.data.password = await bcrypt.hash(req.body.data.password, 12);
     } catch (err) {
       return res.status(500).json(err);
     }
-  } else {
-    return res.status(403).json("You can update only your account!");
+  }
+  try {
+    const user = await User.findByIdAndUpdate(req.user.id, {
+      $set: req.body.data,
+    });
+    res.status(200).json({ msg: "Account has been updated" });
+  } catch (err) {
+    return res.status(500).json(err);
   }
 };
 
@@ -37,9 +33,8 @@ export const deleteUser = async (req, res) => {
 };
 
 export const getCurrentUser = async (req, res) => {
-  const user = req.user;
   try {
-    const Currentuser = await User.findById(user.id);
+    const Currentuser = await User.findById(req.user.id);
     const { password, updatedAt, createdAt, __v, ...other } = Currentuser._doc;
     res.status(200).json(other);
   } catch (err) {
@@ -102,7 +97,7 @@ export const unfollowUser = async (req, res) => {
 export const getUserFriends = async (req, res) => {
   const user = req.user;
   try {
-    const Currentuser = await User.findById(user.id);
+    const Currentuser = await User.findById(req.params.id);
     const friends = await User.find({
       _id: { $in: Currentuser.following },
     });

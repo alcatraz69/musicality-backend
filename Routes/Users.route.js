@@ -13,8 +13,8 @@ import authenticate from "../Middleware/authenticate.js";
 
 router.get("/getcurrentuser", authenticate, getCurrentUser);
 router.get("/getuser/:id", authenticate, getUser);
-router.get("/getuserfriends", authenticate, getUserFriends);
-router.put("/updateuser/:id", updateUser);
+router.get("/getuserfriends/:id", authenticate, getUserFriends);
+router.put("/updateuser", authenticate, updateUser);
 router.put("/followuser/:id", authenticate, followUser);
 router.put("/unfollowuser/:id", authenticate, unfollowUser);
 router.delete("/deleteuser/:id", deleteUser);
