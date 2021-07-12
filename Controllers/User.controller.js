@@ -1,5 +1,6 @@
 import { User } from "../Models/User.model.js";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
 export const updateUser = async (req, res) => {
   if (req.body.data.password) {
@@ -34,7 +35,9 @@ export const deleteUser = async (req, res) => {
 
 export const getCurrentUser = async (req, res) => {
   try {
-    const Currentuser = await User.findById(req.user.id);
+    const Currentuser = await User.findById(req.user.id)
+      .populate("following", "_id profilePicture name")
+      .exec();
     const { password, updatedAt, createdAt, __v, ...other } = Currentuser._doc;
     res.status(200).json(other);
   } catch (err) {
@@ -45,7 +48,9 @@ export const getCurrentUser = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const Currentuser = await User.findById(req.params.id);
+    const Currentuser = await User.findById(req.params.id)
+      .populate("following", "_id profilePicture name")
+      .exec();
     const { password, updatedAt, createdAt, __v, ...other } = Currentuser._doc;
     res.status(200).json(other);
   } catch (err) {
@@ -56,13 +61,20 @@ export const getUser = async (req, res) => {
 
 export const followUser = async (req, res) => {
   if (req.user.id !== req.params.id) {
+    const otherUserId = mongoose.Types.ObjectId(req.params.id);
+    // console.log(mongoose.isValidObjectId(otherUserId));
     try {
       const otherUser = await User.findById(req.params.id);
       const currentUser = await User.findById(req.user.id);
       if (!otherUser.followers.includes(req.user.id)) {
         await otherUser.updateOne({ $push: { followers: req.user.id } });
-        await currentUser.updateOne({ $push: { following: req.params.id } });
-        res.status(200).json("user has been followed");
+        await currentUser.updateOne({
+          $push: { following: otherUserId },
+        });
+        const { following } = await User.findById(req.user.id)
+          .populate("following", "_id profilePicture name")
+          .exec();
+        res.status(200).json({ msg: "user has been followed", following });
       } else {
         res.status(403).json("you allready follow this user");
       }
@@ -76,13 +88,17 @@ export const followUser = async (req, res) => {
 
 export const unfollowUser = async (req, res) => {
   if (req.user.id !== req.params.id) {
+    const otherUserId = mongoose.Types.ObjectId(req.params.id);
     try {
       const otherUser = await User.findById(req.params.id);
       const currentUser = await User.findById(req.user.id);
       if (otherUser.followers.includes(req.user.id)) {
         await otherUser.updateOne({ $pull: { followers: req.user.id } });
-        await currentUser.updateOne({ $pull: { followings: req.params.id } });
-        res.status(200).json("user has been unfollowed");
+        await currentUser.updateOne({ $pull: { following: otherUserId } });
+        const { following } = await User.findById(req.user.id)
+          .populate("following", "_id profilePicture name")
+          .exec();
+        res.status(200).json({ msg: "user has been unfollowed", following });
       } else {
         res.status(403).json("you dont follow this user");
       }
@@ -95,7 +111,6 @@ export const unfollowUser = async (req, res) => {
 };
 
 export const getUserFriends = async (req, res) => {
-  const user = req.user;
   try {
     const Currentuser = await User.findById(req.params.id);
     const friends = await User.find({

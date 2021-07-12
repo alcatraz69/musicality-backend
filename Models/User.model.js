@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
     },
     following: {
       type: Array,
-      default: [],
+      default: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     },
     about: {
       type: String,
