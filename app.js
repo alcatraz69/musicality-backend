@@ -18,6 +18,6 @@ app.use("/", (req, res) => {
   res.json("Musicality Server");
 });
 
-app.listen(5000, () => {
+app.listen(process.env.PORT || 5000, () => {
   console.log("Server Running");
 });
