@@ -110,13 +110,16 @@ export const unfollowUser = async (req, res) => {
   }
 };
 
-export const getUserFriends = async (req, res) => {
+export const getUserSuggestions = async (req, res) => {
   try {
-    const Currentuser = await User.findById(req.params.id);
-    const friends = await User.find({
-      _id: { $in: Currentuser.following },
-    });
-    res.status(200).json(friends);
+    const Currentuser = await User.findById(req.user.id);
+    const suggestions = await User.find({
+      _id: {
+        $nin: [...Currentuser.following.map((id) => id.toString())],
+        $ne: req.user.id,
+      },
+    }).select("name profilePicture about");
+    res.status(200).json(suggestions);
   } catch (err) {
     res.status(500).json(err);
     console.log(err);

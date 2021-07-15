@@ -6,14 +6,14 @@ import {
   getUser,
   followUser,
   unfollowUser,
-  getUserFriends,
   getCurrentUser,
+  getUserSuggestions,
 } from "../Controllers/User.controller.js";
 import authenticate from "../Middleware/authenticate.js";
 
 router.get("/getcurrentuser", authenticate, getCurrentUser);
 router.get("/getuser/:id", authenticate, getUser);
-router.get("/getuserfriends/:id", authenticate, getUserFriends);
+router.get("/getUserSuggestions", authenticate, getUserSuggestions);
 router.put("/updateuser", authenticate, updateUser);
 router.put("/followuser/:id", authenticate, followUser);
 router.put("/unfollowuser/:id", authenticate, unfollowUser);

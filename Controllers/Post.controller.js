@@ -3,8 +3,10 @@ import { Post } from "../Models/Post.model.js";
 
 export const createPost = async (req, res) => {
   const newPost = new Post(req.body);
+
   try {
     const savedPost = await newPost.save();
+    await savedPost.populate("user", "_id profilePicture name").execPopulate();
     res.status(200).json(savedPost);
   } catch (err) {
     res.status(500).json(err);
@@ -46,12 +48,14 @@ export const likePost = async (req, res) => {
       await post.updateOne({
         $push: { likes: req.user.id },
       });
-      res.status(200).json({ msg: "The post has been liked" });
+      const { likes, _id } = await Post.findById(req.params.id);
+      res.status(200).json({ msg: "The post has been liked", likes, _id });
     } else {
       await post.updateOne({
         $pull: { likes: req.user.id },
       });
-      res.status(200).json({ msg: "The post has been disliked" });
+      const { likes, _id } = await Post.findById(req.params.id);
+      res.status(200).json({ msg: "The post has been disliked", likes, _id });
     }
   } catch (err) {
     res.status(500).json(err);
@@ -96,5 +100,6 @@ export const userPost = async (req, res) => {
     res.status(200).json(posts);
   } catch (err) {
     res.status(500).json(err);
+    console.log(err);
   }
 };
