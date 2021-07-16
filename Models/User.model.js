@@ -27,8 +27,8 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
     following: {
-      type: Array,
-      default: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: [],
     },
     about: {
       type: String,

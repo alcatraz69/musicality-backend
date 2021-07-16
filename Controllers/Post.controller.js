@@ -1,5 +1,6 @@
 import { User } from "../Models/User.model.js";
 import { Post } from "../Models/Post.model.js";
+import mongoose from "mongoose";
 
 export const createPost = async (req, res) => {
   const newPost = new Post(req.body);
@@ -72,18 +73,24 @@ export const getPost = async (req, res) => {
 };
 
 export const timelinePost = async (req, res) => {
-  const user = req.user;
+  const userId = mongoose.Types.ObjectId(req.user.id);
+  // console.log(userId);
   try {
-    const currentUser = await User.findById(user.id);
-    const userPosts = await Post.find({ user: currentUser._id })
+    const currentUser = await User.findOne({ _id: userId });
+    // console.log("tp", currentUser);
+    const userPosts = await Post.find({ user: userId })
       .populate("user", "_id profilePicture name")
       .sort("-createdAt")
       .exec();
+    // console.log("CU", userPosts);
     const timelinePosts = await Post.find({
-      user: { $in: currentUser.following },
+      user: {
+        $in: currentUser.following,
+      },
     })
       .populate("user", "_id profilePicture name")
       .exec();
+    // Currentuser.following.map((id) => id.toString())
     res.json(userPosts.concat(...timelinePosts));
   } catch (err) {
     res.status(500).json(err);

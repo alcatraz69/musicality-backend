@@ -35,8 +35,8 @@ export const deleteUser = async (req, res) => {
 
 export const getCurrentUser = async (req, res) => {
   try {
-    const Currentuser = await User.findById(req.user.id)
-      .populate("following", "_id profilePicture name")
+    const Currentuser = await User.findOne({ _id: req.user.id })
+      .populate("following")
       .exec();
     const { password, updatedAt, createdAt, __v, ...other } = Currentuser._doc;
     res.status(200).json(other);
@@ -64,7 +64,7 @@ export const followUser = async (req, res) => {
     const otherUserId = mongoose.Types.ObjectId(req.params.id);
     // console.log(mongoose.isValidObjectId(otherUserId));
     try {
-      const otherUser = await User.findById(req.params.id);
+      const otherUser = await User.findOne({ _id: req.params.id });
       const currentUser = await User.findById(req.user.id);
       if (!otherUser.followers.includes(req.user.id)) {
         await otherUser.updateOne({ $push: { followers: req.user.id } });
@@ -111,11 +111,12 @@ export const unfollowUser = async (req, res) => {
 };
 
 export const getUserSuggestions = async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.user.id);
   try {
-    const Currentuser = await User.findById(req.user.id);
+    const Currentuser = await User.findOne({ _id: userId });
     const suggestions = await User.find({
       _id: {
-        $nin: [...Currentuser.following.map((id) => id.toString())],
+        $nin: Currentuser.following,
         $ne: req.user.id,
       },
     }).select("name profilePicture about");
